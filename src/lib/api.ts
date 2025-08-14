@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { DocumentDTO } from '@/types/api';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8079';
 
 export const api = axios.create({
   baseURL,
@@ -43,24 +43,25 @@ api.interceptors.response.use(
 // API endpoints
 export const documentsApi = {
   // List all documents
-  list: () => api.get<DocumentDTO[]>('/documents'),
+  list: () => api.get<DocumentDTO[]>('/docs'),
   
   // Get document by ID
-  getById: (id: string) => api.get<DocumentDTO>(`/documents/${id}`),
+  getById: (id: string) => api.get<DocumentDTO>(`/docs/${id}`),
   
   // Update document
   update: (id: string, document: DocumentDTO) => 
-    api.put<DocumentDTO>(`/documents/${id}`, document),
+    api.put<DocumentDTO>(`/docs/${id}`, document),
   
   // Upload file
   upload: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
     
-    return api.post<DocumentDTO>('/upload', formData, {
+    return api.post<DocumentDTO>('/docs/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
   },
+  
 };
