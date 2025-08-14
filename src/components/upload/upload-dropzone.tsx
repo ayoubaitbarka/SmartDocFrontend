@@ -135,7 +135,7 @@ export function UploadDropzone({ onUploadComplete }: UploadDropzoneProps) {
                   Choose File
                 </Button>
                 <p className="text-xs text-muted-foreground mt-4">
-                  Supported formats: PDF, PNG, JPG, JPEG, GIF, BMP, WebP
+                  Supported formats: DOC, DOCX, PDF, PNG, JPG, JPEG
                 </p>
               </div>
             )}
