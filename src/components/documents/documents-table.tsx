@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   Search, 
@@ -25,7 +25,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DocumentDTO } from '@/types/api';
 import { toast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
 
 interface DocumentsTableProps {
   documents: DocumentDTO[];
@@ -44,12 +43,16 @@ export function DocumentsTable({ documents, isLoading }: DocumentsTableProps) {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const filteredAndSortedDocuments = useMemo(() => {
-    let filtered = documents;
-    
+    // ✅ De-duplicate by id to ensure unique React keys
+    const uniqueDocs = Array.from(
+      new Map(documents.map(d => [d.id, d])).values()
+    );
+
     // Filter by search query
+    let filtered = uniqueDocs;
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = documents.filter(
+      filtered = uniqueDocs.filter(
         (doc) =>
           doc.fileName.toLowerCase().includes(query) ||
           doc.docType.toLowerCase().includes(query) ||
@@ -93,7 +96,7 @@ export function DocumentsTable({ documents, isLoading }: DocumentsTableProps) {
         title: "Copied!",
         description: `${label} copied to clipboard`,
       });
-    } catch (err) {
+    } catch {
       toast({
         title: "Copy Failed",
         description: "Failed to copy to clipboard",
