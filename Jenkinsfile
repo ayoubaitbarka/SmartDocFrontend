@@ -246,24 +246,6 @@ pipeline {
             }
         }
     }
-    
-    post {
-        always {
-            echo 'Cleaning up...'
-            script {
-                // Logout from Docker
-                bat 'docker logout || echo "Already logged out"'
-                
-                // Clean up test containers
-                bat 'docker stop test-frontend || echo "No test container to stop"'
-                bat 'docker rm test-frontend || echo "No test container to remove"'
-                
-                // Optional: Remove local images to save space
-                // Uncomment if you want to clean up local images
-                // bat "docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || echo 'Tagged image already removed'"
-                // bat "docker rmi ${DOCKER_IMAGE}:latest || echo 'Latest image already removed'"
-            }
-        }
         success {
             echo '🎉 Frontend pipeline completed successfully!'
             echo "✅ Frontend image: ${DOCKER_IMAGE}:${DOCKER_TAG}"
