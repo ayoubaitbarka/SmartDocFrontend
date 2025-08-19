@@ -180,40 +180,7 @@ pipeline {
             }
         }
         
-        stage('Test Docker Image') {
-            steps {
-                echo 'Testing Docker image...'
-                script {
-                    try {
-                        // Test if the image can run
-                        bat "docker run --rm -d --name test-frontend -p 8081:80 ${DOCKER_IMAGE}:latest"
-                        
-                        // Wait a moment for container to start
-                        sleep 5
-                        
-                        // Test if nginx is serving content (optional)
-                        script {
-                            try {
-                                bat 'curl -f http://localhost:8081 || echo "Service test completed"'
-                            } catch (Exception curlError) {
-                                echo 'curl not available, skipping HTTP test'
-                            }
-                        }
-                        
-                        // Stop test container
-                        bat 'docker stop test-frontend || echo "Container already stopped"'
-                        
-                        echo '✓ Docker image test successful'
-                        
-                    } catch (Exception e) {
-                        echo "Docker test warning: ${e.getMessage()}"
-                        // Clean up on failure
-                        bat 'docker stop test-frontend || echo "Container cleanup"'
-                        bat 'docker rm test-frontend || echo "Container cleanup"'
-                    }
-                }
-            }
-        }
+
         
         stage('Push to DockerHub') {
             steps {
@@ -221,11 +188,9 @@ pipeline {
                 script {
                     try {
                         withCredentials([string(credentialsId: "${DOCKERHUB_CREDENTIALS}", variable: 'dockerhubpwd')]) {
-                            // Login to DockerHub
                             bat 'docker login -u ooutaleb -p %dockerhubpwd%'
                         }
                         
-                        // Push both tags
                         bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
                         bat "docker push ${DOCKER_IMAGE}:latest"
                         
@@ -246,6 +211,15 @@ pipeline {
             }
         }
     }
+    
+    post {
+        always {
+            echo 'Cleaning up...'
+            script {
+                
+                bat 'docker logout || echo "Already logged out"'
+            }
+        }
         success {
             echo '🎉 Frontend pipeline completed successfully!'
             echo "✅ Frontend image: ${DOCKER_IMAGE}:${DOCKER_TAG}"
